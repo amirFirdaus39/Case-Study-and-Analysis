@@ -1,1 +1,1 @@
-Compilation of some of the analysis I made during my study in University Malaya.
+Compilation of some of the case studies and analysis I made during my study in University Malaya.
