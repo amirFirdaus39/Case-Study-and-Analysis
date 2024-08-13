@@ -1,0 +1,143 @@
+import warnings
+import os
+import time
+# import datetime as datetime
+import selenium.common
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
+import datetime as date
+import glob
+import requests
+import getpass
+from datetime import datetime
+from selenium.webdriver.chrome.service import Service
+# from bs4 import BeautifulSoup
+import pandas as pd
+import re
+import numpy as np
+import json
+# import base64
+import openpyxl
+from dateutil.relativedelta import relativedelta
+from datalink_api_class import api_datalink as dlink
+
+import datetime as dt
+from io import StringIO
+import sys
+import urllib.parse
+
+warnings.filterwarnings('ignore')
+
+time_start = date.datetime.now()
+print("Start at", time_start)
+now = datetime.now().strftime('%Y-%m-%d')
+
+# login config
+USER_ID = "a50031861"
+USER_PASS = "1729ab8e32e__"
+
+# directory paths
+username = getpass.getuser()
+path = os.path.dirname(os.path.abspath(__file__))
+download_folder = os.path.join(path, 'exported files')  # folder for downloaded files
+
+# Check whether the specified path exists or not
+isExist = os.path.exists(download_folder)
+if not isExist:
+    # Create a new directory because it does not exist
+    os.makedirs(download_folder)
+    print(download_folder + " directory is created.")
+else:
+    print(download_folder)
+
+# webdriver config
+options = webdriver.ChromeOptions()
+options.add_experimental_option('excludeSwitches', ['enable-logging'])
+prefs = {"download.default_directory": download_folder}  # set default download directory for selenium
+options.add_experimental_option("prefs", prefs)
+browser = webdriver.Chrome(options=options)
+wait = WebDriverWait(browser, 3)
+browser.maximize_window()
+action = ActionChains(browser)
+
+
+def locate_element_id(element):
+    while True:
+        try:
+            wait.until(EC.presence_of_element_located((By.ID, element)))
+            break
+        except selenium.common.exceptions.TimeoutException:
+            print('Connection Time Out, Browser Refresh.')
+
+
+def locate_element_xp(element):
+    while True:
+        try:
+            wait.until(EC.presence_of_element_located((By.XPATH, element)))
+            break
+        except selenium.common.exceptions.TimeoutException:
+            print('Connection Time Out, Browser Refresh.')
+
+
+def locate_element_link(element):
+    while True:
+        try:
+            wait.until(EC.presence_of_element_located((By.LINK_TEXT, element)))
+            break
+        except selenium.common.exceptions.TimeoutException:
+            print('Connection Time Out, Browser Refresh.')
+
+
+def locate_element(by, element):
+    elemDict = {'id': By.ID,
+                'class': By.CLASS_NAME,
+                'xpath': By.XPATH,
+                'tag': By.TAG_NAME,
+                'css': By.CSS_SELECTOR,
+                'link': By.LINK_TEXT,
+                'name': By.NAME}
+
+    if by in elemDict:
+        counter = 20
+        while True and counter != 0:
+            try:
+                wait.until(EC.presence_of_element_located((elemDict.get(by), element)))
+                break
+            except selenium.common.exceptions.TimeoutException:
+                print('Wait for element to be located... Num of tries left:', counter)
+                counter = counter - 1
+
+
+def click(by, elem):
+    elemDict = {'id': By.ID,
+                'class': By.CLASS_NAME,
+                'xpath': By.XPATH,
+                'tag': By.TAG_NAME,
+                'css': By.CSS_SELECTOR,
+                'link': By.LINK_TEXT,
+                'name': By.NAME}
+
+    if by in elemDict:
+        counter = 20
+        while True and counter != 0:
+            try:
+                wait.until(EC.presence_of_element_located((elemDict.get(by), elem)))
+                break
+            except selenium.common.exceptions.TimeoutException:
+                print('Wait for element to be located... Num of tries left:', counter)
+                counter = counter - 1
+        counter = 20
+        while True and counter != 0:
+            try:
+                wait.until(EC.element_to_be_clickable((elemDict.get(by), elem)))
+                break
+            except selenium.common.exceptions.TimeoutException:
+                print('Wait for element to be clickable... Num of tries left:', counter)
+                counter = counter - 1
+
+        browser.find_element(elemDict.get(by), elem).click()
+        time.sleep(5)
